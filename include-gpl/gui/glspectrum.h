@@ -131,6 +131,7 @@ private:
 	bool m_displayHistogram;
 
 	bool m_displayChanged;
+	GLuint m_channelMarker;
 
 	QGLShaderProgram shaderprog;
 	int vertexAtt;

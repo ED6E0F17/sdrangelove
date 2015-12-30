@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#if 0
+#if USE_SIMD
 #include <immintrin.h>
 #endif
 #include <QMouseEvent>
@@ -39,6 +39,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_leftMarginTextureAllocated(false),
 	m_frequencyTextureAllocated(false),
 	m_waterfallBuffer(NULL),
+	m_channelMarker(0),
 	m_waterfallTextureAllocated(false),
 	m_waterfallTextureHeight(-1),
 	m_displayWaterfall(true),
@@ -110,6 +111,11 @@ GLSpectrum::~GLSpectrum()
 	if(m_waterfallBuffer != NULL) {
 		delete m_waterfallBuffer;
 		m_waterfallBuffer = NULL;
+	}
+	if(m_channelMarker) {
+		makeCurrent();
+		deleteTexture(m_channelMarker);
+		m_channelMarker = 0;
 	}
 	if(m_waterfallTextureAllocated) {
 		makeCurrent();
@@ -318,8 +324,7 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 		m_histogramHoldoffCount = m_histogramHoldoffBase;
 	}
 
-#define NO_AVX
-#ifdef NO_AVX
+#ifndef USE_SIMD
 	for(int i = 0; i < m_fftSize; i++) {
 		int v = (int)((spectrum[i] - m_referenceLevel) * 100.0 / m_powerRange + 100.0);
 
@@ -595,6 +600,30 @@ void GLSpectrum::paintGL()
 		glPopMatrix();
 		glDisable(GL_BLEND);
 	}
+#endif
+#if 1
+		// paint channels
+		glPushMatrix();
+		glBindTexture(GL_TEXTURE_2D, m_channelMarker);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTranslatef(m_glWaterfallRect.x(), m_glFrequencyScaleRect.y(), 0);
+		glScalef(m_glWaterfallRect.width(), m_glFrequencyScaleRect.height(), 1);
+		for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
+			ChannelMarkerState* dv = m_channelMarkerStates[i];
+			if(dv->m_channelMarker->getVisible()) {
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_CONSTANT_COLOR, GL_ONE);
+				glBlendColor(dv->m_channelMarker->getColor().redF(), dv->m_channelMarker->getColor().greenF(), dv->m_channelMarker->getColor().blueF(), 0.8f);
+				glPushMatrix();
+				glTranslatef(dv->m_glRect.x(), dv->m_glRect.y(), 0);
+				glScalef(dv->m_glRect.width(), dv->m_glRect.height(), 1);
+				GLtexBox();
+				glPopMatrix();
+				glDisable(GL_BLEND);
+			}
+		}
+		glPopMatrix();
 #endif
 	shaderprog.release();
 	m_mutex.unlock();
@@ -889,6 +918,9 @@ void GLSpectrum::applyChanges()
 		glGenTextures(1, &m_histogramTexture);
 		m_histogramTextureAllocated = true;
 	}
+	if(!m_channelMarker) {
+		glGenTextures(1, &m_channelMarker);
+	}
 
 	bool fftSizeChanged = true;
 	if(m_waterfallBuffer != NULL)
@@ -941,6 +973,10 @@ void GLSpectrum::applyChanges()
 		memset(data, 0x00, m_fftSize * 100 * 4);
 		glBindTexture(GL_TEXTURE_2D, m_histogramTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_fftSize, 100, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+		memset(data, 0xD0, 16 * 16 * 4);
+		glBindTexture(GL_TEXTURE_2D, m_channelMarker);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 16, 16, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		delete[] data;
 	}
 
