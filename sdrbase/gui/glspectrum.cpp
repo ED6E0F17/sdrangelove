@@ -65,27 +65,29 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 		 ((quint8*)&m_waterfallPalette[i])[0] = c.red();
 		 ((quint8*)&m_waterfallPalette[i])[1] = c.green();
 		 ((quint8*)&m_waterfallPalette[i])[2] = c.blue();
-		 ((quint8*)&m_waterfallPalette[i])[3] = c.alpha();
+		 ((quint8*)&m_waterfallPalette[i])[3] = 255;
 	}
 	m_waterfallPalette[239] = 0xffffffff;
 
 	m_histogramPalette[0] = m_waterfallPalette[0];
 	for(int i = 1; i < 240; i++) {
 		 QColor c;
-		 c.setHsv(239 - i, 255 - ((i < 200) ? 0 : (i - 200) * 3), 150 + ((i < 100) ? i : 100));
+		 c.setHsv(239 - i, 200 - ((i < 200) ? 0 : (i - 200) * 3), 150 + ((i < 100) ? i : 100));
 		 ((quint8*)&m_histogramPalette[i])[0] = c.red();
 		 ((quint8*)&m_histogramPalette[i])[1] = c.green();
 		 ((quint8*)&m_histogramPalette[i])[2] = c.blue();
-		 ((quint8*)&m_histogramPalette[i])[3] = c.alpha();
+		 ((quint8*)&m_histogramPalette[i])[3] = 255;
 	}
+#if 0
 	for(int i = 1; i < 16; i++) {
 		QColor c;
-		c.setHsv(270, 128, 48 + i * 4);
+		c.setHsv(250, 64, 48 + i * 4);
 		((quint8*)&m_histogramPalette[i])[0] = c.red();
 		((quint8*)&m_histogramPalette[i])[1] = c.green();
 		((quint8*)&m_histogramPalette[i])[2] = c.blue();
-		((quint8*)&m_histogramPalette[i])[3] = c.alpha();
+		((quint8*)&m_histogramPalette[i])[3] = 255;
 	}
+#endif
 	m_histogramHoldoffBase = 4;
 	m_histogramHoldoffCount = m_histogramHoldoffBase;
 	m_histogramLateHoldoff = 20;
@@ -279,9 +281,7 @@ void GLSpectrum::updateWaterfall(const std::vector<Real>& spectrum)
 		quint32* pix = (quint32*)m_waterfallBuffer->scanLine(m_waterfallBufferPos);
 
 		for(int i = 0; i < m_fftSize; i++) {
-			Real vr = (int)((spectrum[i] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
-			int v = (int)vr;
-
+			int v = (int)((spectrum[i] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
 			if(v > 239)
 				v = 239;
 			else if(v < 0)
@@ -531,6 +531,17 @@ void GLSpectrum::paintGL()
 	}
 #endif
 #if 1
+	if(m_displayMaxHold) {
+		if(m_maxHold.size() < (uint)m_fftSize)
+			m_maxHold.resize(m_fftSize);
+		for(int i = 0; i < m_fftSize; i++) {
+			int j;
+			quint8* bs = m_histogram + i * 100;
+			for(j = 99; j > 1; j--)
+				if(bs[j] > 0) break;
+			m_maxHold[i] = j;
+		}
+	}
 	// paint histogram
 	if(m_displayHistogram || m_displayMaxHold) {
 		glPushMatrix();
@@ -550,17 +561,29 @@ void GLSpectrum::paintGL()
 				}
 				bs++;
 			}
-
-			// draw texture
-			glBindTexture(GL_TEXTURE_2D, m_histogramTexture);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_fftSize, 100, GL_RGBA, GL_UNSIGNED_BYTE, m_histogramBuffer->scanLine(0));
-
-			GLtexBox();
+		} else {
+			// clear texture
+			m_histogramBuffer->fill(qRgb(0x00, 0x00, 0x00));
 		}
+		if(m_displayMaxHold) {
+			quint32* pix;
+			quint8* bs = m_histogram;
+			for(int x = 0; x < m_fftSize; x++) {
+				int y = m_maxHold[x];
+				pix = (quint32*)m_histogramBuffer->scanLine(99 - y);
+				pix +=x;
+				*pix = 0xFF0000FF;
+			}
+		}
+
+		// draw texture
+		glBindTexture(GL_TEXTURE_2D, m_histogramTexture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_fftSize, 100, GL_RGBA, GL_UNSIGNED_BYTE, m_histogramBuffer->scanLine(0));
+
+		GLtexBox();
 		glPopMatrix();
 	}
 #endif
@@ -599,16 +622,14 @@ void GLSpectrum::paintGL()
 		GLtexBox();
 		glPopMatrix();
 		glDisable(GL_BLEND);
-	}
-#endif
-#if 1
+
 		// paint channels
 		glPushMatrix();
 		glBindTexture(GL_TEXTURE_2D, m_channelMarker);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTranslatef(m_glWaterfallRect.x(), m_glFrequencyScaleRect.y(), 0);
-		glScalef(m_glWaterfallRect.width(), m_glFrequencyScaleRect.height(), 1);
+		glTranslatef(m_glFrequencyScaleRect.x(), m_glFrequencyScaleRect.y(), 0);
+		glScalef(m_glFrequencyScaleRect.width(), m_glFrequencyScaleRect.height(), 1);
 		for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
 			ChannelMarkerState* dv = m_channelMarkerStates[i];
 			if(dv->m_channelMarker->getVisible()) {
@@ -624,6 +645,7 @@ void GLSpectrum::paintGL()
 			}
 		}
 		glPopMatrix();
+	}
 #endif
 	shaderprog.release();
 	m_mutex.unlock();
