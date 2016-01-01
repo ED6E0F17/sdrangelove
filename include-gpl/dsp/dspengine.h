@@ -25,13 +25,11 @@
 #include "dsp/dsptypes.h"
 #include "dsp/fftwindow.h"
 #include "dsp/samplefifo.h"
-#include "audio/audiooutput.h"
 #include "util/messagequeue.h"
 #include "util/export.h"
 
 class SampleSource;
 class SampleSink;
-class AudioFifo;
 
 class SDRANGELOVE_API DSPEngine : public QThread {
 	Q_OBJECT
@@ -60,9 +58,6 @@ public:
 	void addSink(SampleSink* sink);
 	void removeSink(SampleSink* sink);
 
-	void addAudioSource(AudioFifo* audioFifo);
-	void removeAudioSource(AudioFifo* audioFifo);
-
 	void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection);
 
 	State state() const { return m_state; }
@@ -83,8 +78,6 @@ private:
 
 	typedef std::list<SampleSink*> SampleSinks;
 	SampleSinks m_sampleSinks;
-
-	AudioOutput m_audioOutput;
 
 	uint m_sampleRate;
 	quint64 m_tunerFrequency;

@@ -75,16 +75,6 @@ MessageQueue* PluginAPI::getDSPEngineMessageQueue()
 	return m_dspEngine->getMessageQueue();
 }
 
-void PluginAPI::addAudioSource(AudioFifo* audioFifo)
-{
-	m_dspEngine->addAudioSource(audioFifo);
-}
-
-void PluginAPI::removeAudioSource(AudioFifo* audioFifo)
-{
-	m_dspEngine->removeAudioSource(audioFifo);
-}
-
 void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface* plugin)
 {
 	m_pluginManager->registerSampleSource(sourceName, plugin);

@@ -27,7 +27,6 @@ class QLabel;
 class QTreeWidgetItem;
 class QDir;
 
-class AudioDeviceInfo;
 class DSPEngine;
 class Indicator;
 class ScopeWindow;
@@ -69,8 +68,6 @@ private:
 	};
 
 	Ui::MainWindow* ui;
-
-	AudioDeviceInfo* m_audioDeviceInfo;
 
 	MessageQueue* m_messageQueue;
 
@@ -127,7 +124,6 @@ private slots:
 	void on_presetTree_itemActivated(QTreeWidgetItem *item, int column);
 	void on_action_Oscilloscope_triggered();
 	void on_action_Loaded_Plugins_triggered();
-	void on_action_Preferences_triggered();
 	void on_sampleSource_currentIndexChanged(int index);
 	void on_action_About_triggered();
 };

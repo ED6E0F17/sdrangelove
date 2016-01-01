@@ -50,8 +50,6 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="action_Preferences"/>
-    <addaction name="separator"/>
     <addaction name="action_Exit"/>
    </widget>
    <widget class="QMenu" name="menu_Acquisition">
@@ -375,11 +373,6 @@
   <action name="action_About">
    <property name="text">
     <string>&amp;About SDRangelove...</string>
-   </property>
-  </action>
-  <action name="action_Preferences">
-   <property name="text">
-    <string>&amp;Preferences...</string>
    </property>
   </action>
   <action name="action_Loaded_Plugins">

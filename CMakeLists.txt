@@ -18,8 +18,6 @@ set(CMAKE_AUTOMOC ON)
 #find_package(Qt4 REQUIRED)
 find_package(Qt5Core 5.0 REQUIRED)
 find_package(Qt5Widgets 5.0 REQUIRED)
-find_package(Qt5Multimedia 5.0 REQUIRED)
-#find_package(QT5OpenGL 5.0 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(PkgConfig)
 
@@ -48,11 +46,6 @@ endif()
 
 set(sdrbase_SOURCES
 	sdrbase/mainwindow.cpp
-
-	sdrbase/audio/audiodeviceinfo.cpp
-	sdrbase/audio/audiofifo.cpp
-	sdrbase/audio/audiooutput.cpp
-
 	sdrbase/dsp/channelizer.cpp
 	sdrbase/dsp/channelmarker.cpp
 	sdrbase/dsp/dspcommands.cpp
@@ -82,7 +75,6 @@ set(sdrbase_SOURCES
 	sdrbase/gui/glspectrumgui.cpp
 	sdrbase/gui/indicator.cpp
 	sdrbase/gui/pluginsdialog.cpp
-	sdrbase/gui/preferencesdialog.cpp
 	sdrbase/gui/presetitem.cpp
 	sdrbase/gui/rollupwidget.cpp
 	sdrbase/gui/scale.cpp
@@ -97,7 +89,6 @@ set(sdrbase_SOURCES
 	sdrbase/plugin/plugininterface.cpp
 	sdrbase/plugin/pluginmanager.cpp
 
-	sdrbase/settings/preferences.cpp
 	sdrbase/settings/preset.cpp
 	sdrbase/settings/settings.cpp
 
@@ -110,11 +101,6 @@ set(sdrbase_SOURCES
 
 set(sdrbase_HEADERS
 	include-gpl/mainwindow.h
-
-	include-gpl/audio/audiodeviceinfo.h
-	include-gpl/audio/audiofifo.h
-	include-gpl/audio/audiooutput.h
-
 	include-gpl/dsp/channelizer.h
 	include/dsp/channelmarker.h
 	include-gpl/dsp/complex.h
@@ -152,7 +138,6 @@ set(sdrbase_HEADERS
 	include-gpl/gui/indicator.h
 	include-gpl/gui/physicalunit.h
 	include-gpl/gui/pluginsdialog.h
-	include-gpl/gui/preferencesdialog.h
 	include-gpl/gui/presetitem.h
 	include/gui/rollupwidget.h
 	include-gpl/gui/scale.h
@@ -166,8 +151,6 @@ set(sdrbase_HEADERS
 	include/plugin/plugingui.h
 	include/plugin/plugininterface.h
 	include-gpl/plugin/pluginmanager.h
-
-	include-gpl/settings/preferences.h
 	include-gpl/settings/preset.h
 	include-gpl/settings/settings.h
 
@@ -192,7 +175,6 @@ set(sdrbase_FORMS
 	sdrbase/gui/basicchannelsettingswidget.ui
 	sdrbase/gui/glspectrumgui.ui
 	sdrbase/gui/pluginsdialog.ui
-	sdrbase/gui/preferencesdialog.ui
 	sdrbase/gui/scopewindow.ui
 )
 

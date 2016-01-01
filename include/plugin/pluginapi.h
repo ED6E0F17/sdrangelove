@@ -12,7 +12,6 @@ class PluginInterface;
 class SampleSource;
 class SampleSink;
 class DSPEngine;
-class AudioFifo;
 class MessageQueue;
 class MainWindow;
 class ChannelMarker;
@@ -41,8 +40,6 @@ public:
 	void addSampleSink(SampleSink* sampleSink);
 	void removeSampleSink(SampleSink* sampleSink);
 	MessageQueue* getDSPEngineMessageQueue();
-	void addAudioSource(AudioFifo* audioFifo);
-	void removeAudioSource(AudioFifo* audioFifo);
 
 	// Sample Source stuff
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);

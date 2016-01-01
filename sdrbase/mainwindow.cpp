@@ -20,13 +20,11 @@
 #include <QLabel>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "audio/audiodeviceinfo.h"
 #include "gui/indicator.h"
 #include "gui/presetitem.h"
 #include "gui/scopewindow.h"
 #include "gui/addpresetdialog.h"
 #include "gui/pluginsdialog.h"
-#include "gui/preferencesdialog.h"
 #include "gui/aboutdialog.h"
 #include "gui/rollupwidget.h"
 #include "dsp/dspengine.h"
@@ -39,7 +37,6 @@
 MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
-	m_audioDeviceInfo(new AudioDeviceInfo),
 	m_messageQueue(new MessageQueue),
 	m_settings(),
 	m_dspEngine(new DSPEngine(m_messageQueue)),
@@ -486,13 +483,6 @@ void MainWindow::on_action_Loaded_Plugins_triggered()
 	PluginsDialog pluginsDialog(m_pluginManager, this);
 
 	pluginsDialog.exec();
-}
-
-void MainWindow::on_action_Preferences_triggered()
-{
-	PreferencesDialog preferencesDialog(m_audioDeviceInfo, this);
-
-	preferencesDialog.exec();
 }
 
 void MainWindow::on_sampleSource_currentIndexChanged(int index)

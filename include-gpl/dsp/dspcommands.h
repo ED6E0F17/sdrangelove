@@ -8,7 +8,6 @@
 
 class SampleSource;
 class SampleSink;
-class AudioFifo;
 
 class SDRANGELOVE_API DSPPing : public Message {
 	MESSAGE_CLASS_DECLARATION
@@ -82,30 +81,6 @@ public:
 
 private:
 	SampleSink* m_sampleSink;
-};
-
-class SDRANGELOVE_API DSPAddAudioSource : public Message {
-	MESSAGE_CLASS_DECLARATION
-
-public:
-	DSPAddAudioSource(AudioFifo* audioFifo) : Message(), m_audioFifo(audioFifo) { }
-
-	AudioFifo* getAudioFifo() const { return m_audioFifo; }
-
-private:
-	AudioFifo* m_audioFifo;
-};
-
-class SDRANGELOVE_API DSPRemoveAudioSource : public Message {
-	MESSAGE_CLASS_DECLARATION
-
-public:
-	DSPRemoveAudioSource(AudioFifo* audioFifo) : Message(), m_audioFifo(audioFifo) { }
-
-	AudioFifo* getAudioFifo() const { return m_audioFifo; }
-
-private:
-	AudioFifo* m_audioFifo;
 };
 
 class SDRANGELOVE_API DSPConfigureSpectrumVis : public Message {

@@ -17,7 +17,6 @@ void Settings::load()
 {
 	QSettings s;
 
-	m_preferences.deserialize(qUncompress(QByteArray::fromBase64(s.value("preferences").toByteArray())));
 	m_current.deserialize(qUncompress(QByteArray::fromBase64(s.value("current").toByteArray())));
 
 	QStringList groups = s.childGroups();
@@ -37,7 +36,6 @@ void Settings::save() const
 {
 	QSettings s;
 
-	s.setValue("preferences", qCompress(m_preferences.serialize()).toBase64());
 	s.setValue("current", qCompress(m_current.serialize()).toBase64());
 
 	QStringList groups = s.childGroups();
@@ -56,7 +54,6 @@ void Settings::save() const
 
 void Settings::resetToDefaults()
 {
-	m_preferences.resetToDefaults();
 	m_current.resetToDefaults();
 }
 
