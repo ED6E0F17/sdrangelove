@@ -31,10 +31,9 @@ void LoRaDemod::interleave6(char* inout, int size)
 			in[i] = in[i + 6] = inout[i + j];
 		// top bits are swapped
 		for (i = 0; i < 6; i++) {
-			s = ( (32 & in[2 + i]) )>>4;
-			s |= ((16 & in[1 + i]) )>>2;
-			s |= ( (8 & in[3 + i]) )>>3;
-			s |= ( (4 & in[4 + i]) | ( 2 & in[5 + i]) | (1 & in[6 + i]) )<<3;
+			s = ( (32 & in[2 + i]) )>>1;
+			s |= ((16 & in[1 + i]) )<<1;
+			s |= (  8 & in[3 + i]) | (4 & in[4 + i]) | ( 2 & in[5 + i]) | (1 & in[6 + i]);
 			s = (s >> i) | (s << (6 - i));
 			inout[i + j] = s & 63;
 		}
@@ -52,7 +51,7 @@ void LoRaDemod::hamming6(char* c, int size)
 	int i;
 
 	for (i = 0; i < size; i++) {
-		c[i] = ((c[i] & 1)<<3) | ((c[i] & 2)<<1) | ((c[i] & 4)>>1) | ((c[i] & 8)>>3);
+		c[i] = (c[i] & 8) | ((c[i] >>2) & 4) | ((c[i] >>4) & 2) | (c[i] & 1);
 	}
 	c[i] = 0;
 }
