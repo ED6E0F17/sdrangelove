@@ -628,8 +628,8 @@ void GLSpectrum::paintGL()
 		glBindTexture(GL_TEXTURE_2D, m_channelMarker);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTranslatef(m_glFrequencyScaleRect.x(), m_glFrequencyScaleRect.y(), 0);
-		glScalef(m_glFrequencyScaleRect.width(), m_glFrequencyScaleRect.height(), 1);
+		glTranslatef(m_glWaterfallRect.x(), m_glFrequencyScaleRect.y(), 0);
+		glScalef(m_glWaterfallRect.width(), m_glFrequencyScaleRect.height(), 1);
 		for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
 			ChannelMarkerState* dv = m_channelMarkerStates[i];
 			if(dv->m_channelMarker->getVisible()) {
