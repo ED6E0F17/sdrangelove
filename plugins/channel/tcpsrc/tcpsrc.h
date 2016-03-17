@@ -125,6 +125,7 @@ protected:
 
 	int m_inputSampleRate;
 	int m_sampleFormat;
+	int m_inputBandwidth;
 	Real m_outputSampleRate;
 	Real m_rfBandwidth;
 	int m_tcpPort;
