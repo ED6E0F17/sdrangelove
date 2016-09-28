@@ -59,12 +59,15 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 
 	m_waterfallShare = 0.66;
 
-	for(int i = 0; i <= 239; i++) {
-		 QColor c;
-		 c.setHsv(239 - i, 255, 15 + i);
-		 ((quint8*)&m_waterfallPalette[i])[0] = c.red();
-		 ((quint8*)&m_waterfallPalette[i])[1] = c.green();
-		 ((quint8*)&m_waterfallPalette[i])[2] = c.blue();
+	int basecolour[9] = {0,4,6,3,1,5,2,7,7};
+	for(uint i = 0; i <= 239; i++) {
+		uint step = i >> 5; // (== i / 32)
+		uint offset = i & 31;
+		uint thisc = basecolour[step];
+		uint nextc = basecolour[step + 1];
+		 ((quint8*)&m_waterfallPalette[i])[0] = 4 * ( offset * (nextc & 1) + (31-offset) * (thisc & 1) );
+		 ((quint8*)&m_waterfallPalette[i])[1] = 2 * ( offset * (nextc & 2) + (31-offset) * (thisc & 2) );
+		 ((quint8*)&m_waterfallPalette[i])[2] = 1 * ( offset * (nextc & 4) + (31-offset) * (thisc & 4) );
 		 ((quint8*)&m_waterfallPalette[i])[3] = 255;
 	}
 	m_waterfallPalette[239] = 0xffffffff;
