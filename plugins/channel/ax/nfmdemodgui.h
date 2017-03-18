@@ -7,7 +7,6 @@
 class PluginAPI;
 class ChannelMarker;
 
-class AudioFifo;
 class ThreadedSampleSink;
 class Channelizer;
 class NFMDemod;
@@ -47,7 +46,6 @@ private:
 	ChannelMarker* m_channelMarker;
 	bool m_basicSettingsShown;
 
-	AudioFifo* m_audioFifo;
 	ThreadedSampleSink* m_threadedSampleSink;
 	Channelizer* m_channelizer;
 	NFMDemod* m_nfmDemod;

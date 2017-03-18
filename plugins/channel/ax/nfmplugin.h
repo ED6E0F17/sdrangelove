@@ -23,7 +23,7 @@ private:
 	PluginAPI* m_pluginAPI;
 
 private slots:
-	void createInstanceNFM();
+	void createInstanceAX();
 };
 
 #endif // INCLUDE_NFMPLUGIN_H

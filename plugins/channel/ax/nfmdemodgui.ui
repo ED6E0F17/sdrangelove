@@ -48,7 +48,7 @@
        <number>1</number>
       </property>
       <property name="value">
-       <number>4</number>
+       <number>8</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -64,7 +64,7 @@
        </size>
       </property>
       <property name="text">
-       <string>12.5kHz</string>
+       <string>36kHz</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

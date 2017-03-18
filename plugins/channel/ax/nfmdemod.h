@@ -24,14 +24,11 @@
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
 #include "dsp/movingaverage.h"
-#include "audio/audiofifo.h"
 #include "util/message.h"
-
-class AudioFifo;
 
 class NFMDemod : public SampleSink {
 public:
-	NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink);
+	NFMDemod(SampleSink* sampleSink);
 	~NFMDemod();
 
 	void configure(MessageQueue* messageQueue, Real rfBandwidth, Real afBandwidth, Real volume, Real squelch);
@@ -71,12 +68,6 @@ private:
 		{ }
 	};
 
-	struct AudioSample {
-		qint16 l;
-		qint16 r;
-	};
-	typedef std::vector<AudioSample> AudioVector;
-
 	Real m_rfBandwidth;
 	Real m_volume;
 	Real m_squelchLevel;
@@ -95,12 +86,8 @@ private:
 	Complex m_last, m_this;
 	MovingAverage m_movingAverage;
 
-	AudioVector m_audioBuffer;
-	uint m_audioBufferFill;
-
 	SampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
-	AudioFifo* m_audioFifo;
 };
 
 #endif // INCLUDE_NFMDEMOD_H

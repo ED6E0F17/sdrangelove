@@ -14,7 +14,7 @@
 #include "gui/basicchannelsettingswidget.h"
 
 const int NFMDemodGUI::m_rfBW[] = {
-	5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
+	5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 36000
 };
 
 NFMDemodGUI* NFMDemodGUI::create(PluginAPI* pluginAPI)
@@ -35,7 +35,7 @@ void NFMDemodGUI::setName(const QString& name)
 
 void NFMDemodGUI::resetToDefaults()
 {
-	ui->rfBW->setValue(4);
+	ui->rfBW->setValue(8);
 	ui->afBW->setValue(3);
 	ui->volume->setValue(20);
 	ui->squelch->setValue(-40);
@@ -155,23 +155,21 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_audioFifo = new AudioFifo(4, 48000 / 4);
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_nfmDemod = new NFMDemod(m_audioFifo, m_spectrumVis);
+	m_nfmDemod = new NFMDemod(m_spectrumVis);
 	m_channelizer = new Channelizer(m_nfmDemod);
 	m_threadedSampleSink = new ThreadedSampleSink(m_channelizer);
-	m_pluginAPI->addAudioSource(m_audioFifo);
 	m_pluginAPI->addSampleSink(m_threadedSampleSink);
 
-	ui->glSpectrum->setCenterFrequency(6000);
-	ui->glSpectrum->setSampleRate(12000);
+	ui->glSpectrum->setCenterFrequency(24000);
+	ui->glSpectrum->setSampleRate(48000);
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 	m_spectrumVis->configure(m_threadedSampleSink->getMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
 
 	m_channelMarker = new ChannelMarker(this);
 	m_channelMarker->setColor(Qt::red);
-	m_channelMarker->setBandwidth(12500);
+	m_channelMarker->setBandwidth(48000);
 	m_channelMarker->setCenterFrequency(0);
 	m_channelMarker->setVisible(true);
 	connect(m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
@@ -185,13 +183,11 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, QWidget* parent) :
 NFMDemodGUI::~NFMDemodGUI()
 {
 	m_pluginAPI->removeChannelInstance(this);
-	m_pluginAPI->removeAudioSource(m_audioFifo);
 	m_pluginAPI->removeSampleSink(m_threadedSampleSink);
 	delete m_threadedSampleSink;
 	delete m_channelizer;
 	delete m_nfmDemod;
 	delete m_spectrumVis;
-	delete m_audioFifo;
 	delete m_channelMarker;
 	delete ui;
 }

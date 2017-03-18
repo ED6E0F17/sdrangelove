@@ -18,31 +18,24 @@
 #include <QTime>
 #include <stdio.h>
 #include "nfmdemod.h"
-#include "audio/audiooutput.h"
 #include "dsp/dspcommands.h"
 
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 
-NFMDemod::NFMDemod(AudioFifo* audioFifo, SampleSink* sampleSink) :
-	m_sampleSink(sampleSink),
-	m_audioFifo(audioFifo)
+NFMDemod::NFMDemod(SampleSink* sampleSink) :
+	m_sampleSink(sampleSink)
 {
-	m_rfBandwidth = 12500;
+	m_rfBandwidth = 36000;
 	m_volume = 2.0;
 	m_squelchLevel = pow(10.0, -40.0 / 10.0);
-	m_sampleRate = 500000;
+	m_sampleRate = 48000;
 	m_frequency = 0;
 	m_scale = 0;
 	m_framedrop = 0;
 
 	m_nco.setFreq(m_frequency, m_sampleRate);
-	m_interpolator.create(16, m_sampleRate, 12500);
+	m_interpolator.create(16, m_sampleRate, 18000);
 	m_sampleDistanceRemain = (Real)m_sampleRate / 48000.0;
-
-	m_lowpass.create(21, 48000, 3000);
-
-	m_audioBuffer.resize(256);
-	m_audioBufferFill = 0;
 
 	m_movingAverage.resize(16, 0);
 }
@@ -80,39 +73,22 @@ void NFMDemod::feed(SampleVector::const_iterator begin, SampleVector::const_iter
 			m_last = m_this;
 			m_this = Complex(ci.real(), ci.imag());
 
-			demod = m_volume * m_lowpass.filter(b - a);
+			demod = m_volume * (b - a);
 			sample = demod * 30000;
 
-			// Display audio spectrum to 12kHz
+			// Display audio spectrum to 50%
 			if (++m_framedrop & 1)
 				m_sampleBuffer.push_back(Sample(sample, sample));
 
 			if(m_squelchState > 0)
 				m_squelchState--;
-			else
-				sample = 0;
-			{
-				m_audioBuffer[m_audioBufferFill].l = sample;
-				m_audioBuffer[m_audioBufferFill].r = sample;
-				++m_audioBufferFill;
-				if(m_audioBufferFill >= m_audioBuffer.size()) {
-					uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
-					if(res != m_audioBufferFill)
-						qDebug("lost %u samples", m_audioBufferFill - res);
-					m_audioBufferFill = 0;
-				}
-			}
 
 			m_sampleDistanceRemain += (Real)m_sampleRate / 48000.0;
 		}
 	}
-	if(m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
-		;//qDebug("lost samples");
-	m_audioBufferFill = 0;
 
 	if(m_sampleSink != NULL)
 		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
-	m_sampleBuffer.clear();
 
 	// TODO: correct levels
 	m_scale = ( end - begin) * m_sampleRate / 48000 / meansqr;
@@ -143,7 +119,6 @@ bool NFMDemod::handleMessage(Message* cmd)
 		MsgConfigureNFMDemod* cfg = (MsgConfigureNFMDemod*)cmd;
 		m_rfBandwidth = cfg->getRFBandwidth();
 		m_interpolator.create(16, m_sampleRate, m_rfBandwidth / 2.1);
-		m_lowpass.create(21, 48000, cfg->getAFBandwidth());
 		m_squelchLevel = pow(10.0, cfg->getSquelch() / 10.0);
 		m_volume = cfg->getVolume();
 		cmd->completed();

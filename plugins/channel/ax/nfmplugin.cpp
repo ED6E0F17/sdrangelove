@@ -5,9 +5,9 @@
 #include "nfmdemodgui.h"
 
 const PluginDescriptor NFMPlugin::m_pluginDescriptor = {
-	QString("NFM Demodulator"),
-	QString("---"),
-	QString("(c) maintech GmbH (written by Christian Daniel)"),
+	QString("AX Demodulator"),
+	QString("0.1"),
+	QString("(c) maintech GmbH"),
 	QString("http://www.maintech.de"),
 	true,
 	QString("http://www.maintech.de")
@@ -27,17 +27,17 @@ void NFMPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
 
-	// register NFM demodulator
-	QAction* action = new QAction(tr("&NFM Demodulator"), this);
-	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceNFM()));
-	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.nfm", this, action);
+	// register AX demodulator
+	QAction* action = new QAction(tr("&AX Demodulator"), this);
+	connect(action, SIGNAL(triggered()), this, SLOT(createInstanceAX()));
+	m_pluginAPI->registerChannel("de.maintech.sdrangelove.channel.ax", this, action);
 }
 
 PluginGUI* NFMPlugin::createChannel(const QString& channelName)
 {
 	if(channelName == "de.maintech.sdrangelove.channel.nfm") {
 		NFMDemodGUI* gui = NFMDemodGUI::create(m_pluginAPI);
-		m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.nfm", gui);
+		m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.ax", gui);
 		m_pluginAPI->addChannelRollup(gui);
 		return gui;
 	} else {
@@ -45,9 +45,9 @@ PluginGUI* NFMPlugin::createChannel(const QString& channelName)
 	}
 }
 
-void NFMPlugin::createInstanceNFM()
+void NFMPlugin::createInstanceAX()
 {
 	NFMDemodGUI* gui = NFMDemodGUI::create(m_pluginAPI);
-	m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.nfm", gui);
+	m_pluginAPI->registerChannelInstance("de.maintech.sdrangelove.channel.ax", gui);
 	m_pluginAPI->addChannelRollup(gui);
 }
