@@ -10,7 +10,7 @@ FCDGui::FCDGui(PluginAPI* pluginAPI, QWidget* parent) :
 	m_sampleSource(NULL)
 {
 	ui->setupUi(this);
-	ui->centerFrequency->setValueRange(7, 420000U, 1900000U);
+	ui->centerFrequency->setValueRange(7, 404000U, 1900000U);
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	displaySettings();
 
@@ -121,7 +121,7 @@ void FCDGui::on_checkBoxR_stateChanged(int state)
 		m_settings.range = 1;
 	}
 	else {
-		ui->centerFrequency->setValueRange(7, 420000U, 1900000U);
+		ui->centerFrequency->setValueRange(7, 404000U, 1900000U);
 		ui->centerFrequency->setValue(434450);
 		m_generalSettings.m_centerFrequency = 434450 * 1000;
 		m_settings.range = 0;
