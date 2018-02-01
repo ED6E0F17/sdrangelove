@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
+//
+// FM demodulation from rtl_fm Copyright (C) 2012 by Kyle Keen <keenerd@gmail.com>
 
 #include <QTcpServer>
 #include <QTcpSocket>
@@ -45,7 +47,7 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, SampleSink* s
 
 	m_last = 0;
 	m_this = 0;
-	m_scale = 0;
+	m_dc = 0;
 	m_sampleBufferSSB.resize(tcpFftLen);
 	TCPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, tcpFftLen);
 	// if (!TCPFilter) segfault;
@@ -66,6 +68,15 @@ void TCPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)
 {
 	Message* cmd = MsgTCPSrcSpectrum::create(enabled);
 	cmd->submit(messageQueue, this);
+}
+
+int TCPSrc::polar_discriminant(Complex a, Complex b)
+{
+	Real cr, cj, angle;
+	cr = a.real() * b.real() + a.imag() * b.imag();
+	cj = a.imag() * b.real() - a.real() * b.imag();
+	angle = atan2(cj, cr);
+	return (int)(angle * (1<<14) / M_PI);
 }
 
 void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
@@ -118,19 +129,16 @@ void TCPSrc::feed(SampleVector::const_iterator begin, SampleVector::const_iterat
 			// An FFT filter here is overkill, but was already set up for SSB
 			int n_out = TCPFilter->runFilt(cj, &sideband);
 			if (n_out) {
-				Real sum = 1.0;
+				Real sum = 0.0;
 				for (int i = 0; i < n_out; i+=2) {
-					l = m_this.real() * (m_last.imag() - sideband[i].imag())
-					  - m_this.imag() * (m_last.real() - sideband[i].real());
-					m_last = sideband[i];
-					r = m_last.real() * (m_this.imag() - sideband[i+1].imag())
-					  - m_last.imag() * (m_this.real() - sideband[i+1].real());
-					m_this = sideband[i+1];
-					m_sampleBufferSSB.push_back(Sample(l * m_scale, r * m_scale));
-					sum += m_this.real() * m_this.real() + m_this.imag() * m_this.imag(); 
+					m_this = sideband[i];
+					l = polar_discriminant(m_this, m_last);
+					m_last = sideband[i+1];
+					r = polar_discriminant(m_last,  m_this);
+					sum += l + r;
+					m_sampleBufferSSB.push_back(Sample(l - m_dc, r - m_dc));
 				}
-				// TODO: correct levels
-				m_scale = 24000 * tcpFftLen / sum;
+				m_dc = int( 0.9 * m_dc + 0.1 * sum / n_out);
 				for(int i = 0; i < m_ssbSockets.count(); i++)
 					m_ssbSockets[i].socket->write((const char*)&m_sampleBufferSSB[0], n_out * 2);
 				m_sampleBufferSSB.clear();
