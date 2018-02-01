@@ -36,6 +36,7 @@ public:
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly);
 	void start();
 	void stop();
+	int  polar_discriminant(Complex a, Complex b);
 	bool handleMessage(Message* cmd);
 
 	class MsgTCPSrcConnection : public Message {
@@ -132,7 +133,7 @@ protected:
 	int m_tcpPort;
 	int m_boost;
 
-	Real m_scale;
+	int m_dc;
 	Complex m_last, m_this;
 
 	NCO m_nco;
